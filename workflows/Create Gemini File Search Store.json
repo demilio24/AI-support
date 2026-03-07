@@ -1,0 +1,93 @@
+{
+  "name": "Create Gemini File Search Store",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "f3b17f26-66df-462f-80f5-8c6c5342b2db",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "resource": "fileSearch",
+        "displayName": "Nils Platform Support Docs"
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "4094a6f3-414c-47a4-93a2-bd24c391c609",
+      "name": "Create a File Search store",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "A2Qg4q87pqlKX1Fb",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Create File Search Store",
+        "height": 272,
+        "width": 608,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -80
+      ],
+      "id": "b3f70d61-b64a-44ca-a5c1-2bdfa687269d",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {
+    "Create a File Search store": [
+      {
+        "json": {
+          "name": "fileSearchStores/nils-platform-support-docs-4womudfm7mg8",
+          "displayName": "Nils Platform Support Docs",
+          "createTime": "2026-03-04T06:57:32.343258Z",
+          "updateTime": "2026-03-04T06:57:32.343258Z"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Create a File Search store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "dc707214-1299-4e08-a1bb-c9b8d0438dad",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "82420622e8beeac28a8beb79036622396503942feaa2d7b20180d51c0acd30d5"
+  },
+  "id": "PEbJXrqHJABuxAXD",
+  "tags": []
+}

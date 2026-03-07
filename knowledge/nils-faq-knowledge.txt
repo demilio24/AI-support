@@ -1,0 +1,203 @@
+Title: Nils Platform - Preguntas Frecuentes (FAQ)
+Type: FAQ Document
+Language: Spanish
+
+============================================================
+
+Category: Gestión de QR
+Q: ¿Existe una app oficial de Nils para formularios vía QR o se usa la cámara?
+A: Se usa la cámara nativa del móvil; esta redirige a una URL optimizada y responsive.
+
+---
+
+Category: Reportes
+Q: ¿Cómo programo un resumen mensual único por cliente para evitar saturación?
+A: Ir a Reporting, seleccionar el tablero, clic en Schedule Report, frecuencia Mensual y añadir destinatario.
+
+---
+
+Category: Flujo de Vencidos
+Q: ¿Cómo automatizo correos cuando un documento cambie a estatus "Vencido"?
+A: Crear Workflow con disparador "Fecha de vencimiento" o "Cambio de estado" filtrado por el valor exacto "Vencido".
+
+---
+
+Category: Envíos Masivos
+Q: ¿Cómo ejecuto seguimiento a toda la base de datos sin restricciones de volumen?
+A: En Smart Lists, seleccionar todos -> Bulk Action (Enviar correo). Usar Modo Goteo para proteger la reputación.
+
+---
+
+Category: Recordatorios
+Q: ¿Cómo activo notificaciones en el calendario 24h antes de la cita?
+A: Workflow con activador "Appointment Status" (confirmada), paso Wait de 24 horas y acción de enviar correo/WA.
+
+---
+
+Category: Membership
+Q: ¿Cómo doy acceso a productos a clientes activos sin que usen el formulario?
+A: Gestionarlo mediante una Oferta (Offer). Manual en el perfil del contacto o masivo vía Workflow con "Grant Offer".
+
+---
+
+Category: Certificados (iPhone)
+Q: ¿Cómo descargar el certificado en iPhone si no se ve en la campana de notificaciones?
+A: El participante debe entrar directamente a la pestaña de certificados dentro de su perfil de usuario.
+
+---
+
+Category: Métodos de Pago
+Q: ¿Cómo integro un método de pago para las capacitaciones?
+A: Ir a Settings -> Integrations -> Payment Processors. Actualmente solo se admiten Stripe y Square.
+
+---
+
+Category: Matriz de Riesgo
+Q: ¿Afecta el cálculo de riesgo si se usa el enlace directo sin la automatización de ocultar campos?
+A: Sí afecta. El campo es clave; si los valores de probabilidad e impacto son distintos entre Natural/Jurídica, el resultado variará.
+
+---
+
+Category: Campos Duplicados
+Q: ¿Cómo mantengo el nombre de un campo que pide el cliente si el sistema dice que está duplicado?
+A: Crear el campo con un nombre interno distinto, pero cambiar el Label (Etiqueta) por el nombre exacto que pide el cliente.
+
+---
+
+Category: Página Web
+Q: ¿Cómo cambio la dirección de la empresa en la web?
+A: Se puede editar directamente en el constructor o, preferiblemente, cambiar el valor en Custom Values > Dirección.
+
+---
+
+Category: Traducciones
+Q: ¿Podemos traducir manualmente los formularios de debida diligencia al inglés?
+A: Solo las etiquetas (labels). Los menús desplegables y field keys deben seguir en español para que el backend calcule el riesgo.
+
+---
+
+Category: Errores de Envío
+Q: ¿Por qué el botón de envío no da confirmación visual en móviles?
+A: El navegador móvil a veces no procesa bien el mensaje. Cambiar la acción a Redirect to URL (una página de Gracias).
+
+---
+
+Category: Datos de Empresa
+Q: ¿Por qué no aparece el nombre de la empresa si el cliente lo llenó?
+A: El campo está bajo el nombre Organization. Solo debe habilitarse como columna en la vista de la tabla.
+
+---
+
+Category: 
+Q: ¿La plataforma tiene establecido algún límite en la cantidad de mensajes que se pueden recibir por WhatsApp?
+A: 
+
+---
+
+Category: 
+Q: ¿Es posible enlazar un número de WhatsApp que ya haya sido creado de un contacto ya existente?
+A: 
+
+---
+
+Category: Category / Theme
+Q: Iveth's Question
+A: Emilio's Response
+
+---
+
+Category: QR Management
+Q: Is there an official Nils app for QR forms, or should the mobile camera be used?
+A: Use the mobile’s native camera; it automatically redirects to an optimized, responsive URL.
+
+---
+
+Category: Reporting
+Q: How do I schedule a single monthly summary per client to avoid notification overload?
+A: Go to Reporting, select the dashboard, click Schedule Report, set frequency to Monthly, and add the recipient.
+
+---
+
+Category: Expired Docs
+Q: How do I automate emails when a document status changes to "Expired"?
+A: Create a Workflow with an "Expiration Date" or "Status Change" trigger filtered by the exact value "Expired."
+
+---
+
+Category: Bulk Actions
+Q: How do I perform follow-ups for the entire database without volume restrictions?
+A: In Smart Lists, select all -> Bulk Action (Send Email). Use Drip Mode to protect domain reputation.
+
+---
+
+Category: Reminders
+Q: How do I activate calendar notifications 24h before an appointment?
+A: Set a Workflow with an "Appointment Status" (confirmed) trigger, a 24-hour Wait step, and a Send Email/WA action.
+
+---
+
+Category: Membership
+Q: How do I grant product access to active clients without them using the signup form?
+A: Manage it via an Offer. Grant it manually in the contact profile or in bulk via a Workflow using the "Grant Offer" step.
+
+---
+
+Category: Certificates (iPhone)
+Q: How do I download the certificate on iPhone if it doesn't show up in the notification bell?
+A: The participant must go directly to the "Certificates" tab within their user profile to view and download it.
+
+---
+
+Category: Payment Methods
+Q: How do I integrate a payment method for training courses?
+A: Go to Settings -> Integrations -> Payment Processors. Currently, only Stripe and Square are supported.
+
+---
+
+Category: Risk Matrix
+Q: Does using the direct link without the "hide fields" automation affect the risk calculation?
+A: Yes. The field is key; if probability and impact values differ between Natural/Juridical types, the final result will be affected.
+
+---
+
+Category: Duplicate Fields
+Q: How do I keep a field name requested by a client if the system says it is a duplicate?
+A: Create the field with a unique internal name, but set the Label (what the user sees) to the exact text the client wants.
+
+---
+
+Category: Website
+Q: How do I change the company address on the website?
+A: You can edit it in the builder or, ideally, update the value in Custom Values > Address to reflect everywhere.
+
+---
+
+Category: Translations
+Q: Can we manually translate the due diligence forms into English?
+A: Only the labels. Dropdown options and field keys must stay in Spanish so the backend can process the risk calculations.
+
+---
+
+Category: Submission Errors
+Q: Why doesn't the submit button provide visual confirmation on mobile devices?
+A: Mobile browsers sometimes fail to process the pop-up. Change the form action to Redirect to URL (a Thank You page).
+
+---
+
+Category: Company Data
+Q: Why isn't the company name appearing if the client filled it out?
+A: The field is stored under Organization. You just need to enable that specific column in your table view.
+
+---
+
+Category: 
+Q: Does the platform have a set limit on the number of messages that can be received via WhatsApp?
+A: 
+
+---
+
+Category: 
+Q: Is it possible to link a WhatsApp number that has already been created from an existing contact?
+A: 
+
+---

@@ -1,0 +1,243 @@
+{
+  "name": "GHL Support Chatbot - Chat Handler",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ghl-chat",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "89c9e706-4244-4655-b1bf-9c75d5651ea8",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        784
+      ],
+      "webhookId": "14e1d387-8cc1-4f76-973d-f7623d4e445c"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "dfa20670-e8a1-4795-b2df-64722437a1e9",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract and validate incoming chat message\nconst body = $input.first().json.body;\n\nconst message = body.message || '';\nconst sessionId = body.sessionId || 'unknown';\nconst history = body.history || [];\n\nif (!message.trim()) {\n  return [{ json: { error: true, answer: 'Please type a question and I\\'ll help you out.' } }];\n}\n\n// Build conversation context from recent history (last 6 exchanges)\nconst recentHistory = history.slice(-6);\nlet conversationContext = '';\nif (recentHistory.length > 1) {\n  conversationContext = recentHistory\n    .slice(0, -1)\n    .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)\n    .join('\\n');\n}\n\nreturn [{ \n  json: { \n    message, \n    sessionId, \n    conversationContext,\n    hasError: false\n  } \n}];"
+      },
+      "id": "c3ff2590-d11d-4916-b7d6-3eb930b3028a",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract answer and source citations from Gemini File Search response\nconst response = $input.first().json;\n\nlet answer = '';\nlet sourceUrl = null;\nlet sourceTitle = null;\n\ntry {\n  const candidates = response.candidates || [];\n  \n  if (candidates.length > 0 && candidates[0].content) {\n    const parts = candidates[0].content.parts || [];\n    answer = parts.map(p => p.text || '').join('');\n  }\n\n  // Extract grounding/citation metadata if available\n  const groundingMetadata = candidates[0]?.groundingMetadata || {};\n  const groundingChunks = groundingMetadata?.groundingChunks || [];\n  const supportChunks = groundingMetadata?.groundingSupports || [];\n  \n  // Try to get source from grounding metadata\n  if (groundingChunks.length > 0) {\n    const firstChunk = groundingChunks[0];\n    if (firstChunk.retrievedContext) {\n      sourceUrl = firstChunk.retrievedContext.uri || null;\n      sourceTitle = firstChunk.retrievedContext.title || 'Support Article';\n    }\n  }\n\n  // Also check for web/retrievalMetadata style citations\n  const retrievalMetadata = candidates[0]?.citationMetadata?.citationSources || [];\n  if (!sourceUrl && retrievalMetadata.length > 0) {\n    sourceUrl = retrievalMetadata[0].uri || null;\n  }\n\n} catch (e) {\n  // Log error for debugging\n  console.error('Response parsing error:', e.message);\n}\n\n// Fallback if no answer extracted\nif (!answer) {\n  answer = \"I'm having trouble processing that right now. Please try rephrasing your question, or email us at info@nilsdigital.com for help.\";\n}\n\n// Clean any GoHighLevel references that might leak through from source docs\nanswer = answer\n  .replace(/GoHighLevel/gi, 'Nils Platform')\n  .replace(/\\bGHL\\b/g, 'Nils Platform')\n  .replace(/HighLevel/gi, 'Nils Platform')\n  .replace(/LeadConnector/gi, 'Nils Platform');\n\n// Rewrite citation URLs to branded domain\nif (sourceUrl) {\n  sourceUrl = sourceUrl.replace('help.leadconnectorhq.com', 'help.nilsdigital.com');\n}\nif (sourceTitle) {\n  sourceTitle = sourceTitle\n    .replace(/GoHighLevel/gi, 'Nils Platform')\n    .replace(/LeadConnector/gi, 'Nils Platform')\n    .replace(/HighLevel/gi, 'Nils Platform');\n}\n\nreturn [{\n  json: {\n    answer,\n    sourceUrl,\n    sourceTitle\n  }\n}];"
+      },
+      "id": "f06feeaf-32f6-45cb-86ad-1d6663907d5b",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googlePalmApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [{\n        \"text\": \"SYSTEM INSTRUCTIONS:\\nYou are the official support assistant for the Nils Platform. You help users with platform questions, compliance topics, and how-to guidance.\\n\\nCRITICAL RULES:\\n- NEVER mention GoHighLevel, GHL, HighLevel, LeadConnector, or any underlying platform name\\n- ALWAYS refer to the platform as \\\"Nils Platform\\\" or \\\"the platform\\\"\\n- NEVER mention that you are AI, Gemini, Claude, ChatGPT, or any AI service\\n- Be direct and actionable — give the answer first, then brief context if needed\\n- If the knowledge base has a clear answer, provide it with confidence\\n- Only ask a clarifying question if the user's intent is genuinely ambiguous\\n- Keep responses concise (2-4 paragraphs max unless a detailed walkthrough is needed)\\n- Use markdown for formatting: **bold** for emphasis, bullet lists for steps\\n- When providing step-by-step instructions, number them clearly\\n- Match the user's language (respond in whatever language they write in)\\n- If you cannot find an answer in the provided context, say: \\\"I don't have a specific article on that topic. Please email us at info@nilsdigital.com and our team will help you directly.\\\"\\n- When citing sources, always use URLs from help.nilsdigital.com\\n\\n\" + ($json.conversationContext ? \"CONVERSATION HISTORY:\\n\" + $json.conversationContext + \"\\n\\n\" : \"\") + \"USER QUESTION:\\n\" + $json.message\n      }]\n    }\n  ],\n  \"tools\": [\n    {\n      \"file_search\": {\n        \"file_search_store_names\": [\n          \"fileSearchStores/nils-platform-support-docs-4womudfm7mg8\"\n        ]\n      }\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.3,\n    \"maxOutputTokens\": 1024,\n    \"topP\": 0.8\n  }\n}) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "b36ccd52-dd48-4201-b15e-3750a5e8eb4d",
+      "name": "Gemini + File Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -128,
+        784
+      ],
+      "notesInFlow": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "A2Qg4q87pqlKX1Fb",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "notes": "⚠️ CONFIGURE:\n1. Set GOOGLE_AI_API_KEY in n8n environment variables\n   (Settings → Environment Variables)\n   OR replace $env.GOOGLE_AI_API_KEY with your key directly\n\n2. Replace YOUR_FILE_SEARCH_STORE_ID with your actual\n   File Search Store name from Google AI Studio\n   (e.g., 'fileSearchStores/nils-support-docs-abc123')\n\nModel: gemini-2.0-flash (fast, cheap, good)\nSwap to gemini-2.5-pro for complex queries."
+    },
+    {
+      "parameters": {
+        "content": "GHL Chat → Incoming Webhook",
+        "height": 112,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        592
+      ],
+      "id": "4cd703c5-96e2-449b-bcd8-44bb0114f00a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Parse User Message + Build Conversation Context",
+        "height": 112,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        592
+      ],
+      "id": "35737004-4599-44a4-9b63-c1e214119671",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Gemini AI → Answer with Knowledge Base Search",
+        "height": 112,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        592
+      ],
+      "id": "638c73db-2e19-4f9c-b92f-5354f2d3c696",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Extract Answer + Clean Branding + Citations",
+        "height": 112,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        48,
+        592
+      ],
+      "id": "407e0de3-99bf-41ea-bbe2-a185a8828441",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Return AI Response to Chat Widget",
+        "height": 112,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        256,
+        592
+      ],
+      "id": "df6fc784-6811-426c-bfb8-ad1a826cb257",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Input": {
+      "main": [
+        [
+          {
+            "node": "Gemini + File Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini + File Search": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a6ca163b-242e-4172-81a9-fa9534e1b966",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "82420622e8beeac28a8beb79036622396503942feaa2d7b20180d51c0acd30d5"
+  },
+  "id": "46FczRY9Ne7CAY5s",
+  "tags": []
+}

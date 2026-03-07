@@ -1,0 +1,599 @@
+{
+  "name": "Nils Chatbot - Knowledge Ingestion (LeadConnector Crawler)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtHour": 3
+            }
+          ]
+        }
+      },
+      "id": "8578fa32-3675-482d-bbdb-10290317838f",
+      "name": "Weekly Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2128,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ════════════════════════════════════════════════════════\n// CONFIG — Only change these values\n// ════════════════════════════════════════════════════════\n\nconst CONFIG = {\n  // Source: LeadConnector Freshdesk help center (server-rendered, crawlable)\n  sourceUrl: 'https://help.leadconnectorhq.com/support/solutions',\n\n  // Branding: What to replace in article text\n  replacements: [\n    { find: /GoHighLevel/gi, replace: 'Nils Platform' },\n    { find: /\\bGHL\\b/g, replace: 'Nils Platform' },\n    { find: /HighLevel/gi, replace: 'Nils Platform' },\n    { find: /Lead\\s*Connector/gi, replace: 'Nils Platform' },\n    { find: /LeadConnector/gi, replace: 'Nils Platform' },\n  ],\n\n  // URL rewrite: Change source URLs in citations\n  // So chatbot citations point to the branded help center\n  sourceUrlDomain: 'help.leadconnectorhq.com',\n  brandedUrlDomain: 'help.nilsdigital.com',\n\n  // Google File Search Store\n  // Replace with the actual store ID from Emilio\n  fileSearchStoreId: 'fileSearchStores/nils-platform-support-docs-4womudfm7mg8',\n};\n\n// ════════════════════════════════════════════════════════\n\nreturn [{ json: CONFIG }];"
+      },
+      "id": "baaeab61-bf2a-4084-a9fa-24512bfd7692",
+      "name": "Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1920,
+        304
+      ],
+      "notesInFlow": true,
+      "notes": "⚠️ CONFIGURE:\n1. Set fileSearchStoreId from Emilio\n2. Verify branded URL domain is correct\n3. API key goes in n8n env: GOOGLE_AI_API_KEY"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.sourceUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "a0f135af-a5b2-47c8-92e1-0ea42d4a4576",
+      "name": "Fetch Solutions Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1696,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ════════════════════════════════════════════════════════\n// Parse the Freshdesk solutions page\n// Extracts all folder URLs and direct article URLs\n// ════════════════════════════════════════════════════════\n\nconst html = $input.first().json.data || $input.first().json.body || '';\nconst domain = 'https://help.leadconnectorhq.com';\n\nconst results = [];\nconst seen = new Set();\n\nconst linkPattern = /href=[\"']([^\"']+)[\"']/gi;\nlet match;\n\nwhile ((match = linkPattern.exec(html)) !== null) {\n  let href = match[1];\n  if (href.startsWith('/')) href = domain + href;\n  if (!href.startsWith(domain) || seen.has(href)) continue;\n  seen.add(href);\n\n  // Article URLs: /support/solutions/articles/XXXXX-slug\n  if (href.includes('/support/solutions/articles/')) {\n    results.push({ json: { url: href.split('?')[0], type: 'article' } });\n  }\n  // Folder URLs: /support/solutions/folders/XXXXX\n  else if (href.includes('/support/solutions/folders/')) {\n    results.push({ json: { url: href.split('?')[0], type: 'folder' } });\n  }\n  // Category URLs: /support/solutions/XXXXX (numeric or named)\n  else if (href.match(/\\/support\\/solutions\\/(?:48|155)\\d+/)) {\n    results.push({ json: { url: href.split('?')[0], type: 'folder' } });\n  }\n}\n\nconsole.log(`Found ${results.filter(r => r.json.type === 'article').length} articles and ${results.filter(r => r.json.type === 'folder').length} folders from main page`);\nreturn results;"
+      },
+      "id": "3773a5f2-5121-413a-9535-d39438f91010",
+      "name": "Extract All Links",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1488,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-folder",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "folder",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c4f33237-f493-456f-b504-32ae73facd33",
+      "name": "Folder or Article?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1264,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
+        }
+      },
+      "id": "4b03e181-025f-4966-8e32-d9d0a052b6d3",
+      "name": "Fetch Folder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1040,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract article URLs from a folder/category page\nconst html = $input.first().json.data || $input.first().json.body || '';\nconst domain = 'https://help.leadconnectorhq.com';\n\nconst results = [];\nconst seen = new Set();\n\nconst linkPattern = /href=[\"']([^\"']+)[\"']/gi;\nlet match;\n\nwhile ((match = linkPattern.exec(html)) !== null) {\n  let href = match[1];\n  if (href.startsWith('/')) href = domain + href;\n  if (!href.startsWith(domain) || seen.has(href)) continue;\n  seen.add(href);\n\n  if (href.includes('/support/solutions/articles/')) {\n    results.push({ json: { url: href.split('?')[0], type: 'article' } });\n  }\n}\n\nreturn results.length > 0 ? results : [{ json: { skip: true } }];"
+      },
+      "id": "d3b98f74-852c-45ec-a1be-0a9e073683c2",
+      "name": "Extract Folder Articles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -816,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge articles from main page + folders, deduplicate\nconst items = $input.all();\nconst seen = new Set();\nconst unique = [];\n\nfor (const item of items) {\n  if (item.json.skip) continue;\n  const url = item.json.url;\n  if (url && !seen.has(url) && url.includes('/articles/')) {\n    seen.add(url);\n    unique.push({ json: { url } });\n  }\n}\n\nconsole.log(`Total unique articles to ingest: ${unique.length}`);\n\nif (unique.length === 0) {\n  return [{ json: { error: 'NO_ARTICLES', message: 'No articles found. Check if the help center URL is correct.' } }];\n}\n\nreturn unique;"
+      },
+      "id": "73c0dd70-0158-4fc5-85ab-9a9fe3604a61",
+      "name": "Deduplicate Articles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -592,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
+        }
+      },
+      "id": "50e67f6e-e379-4c97-8166-6c1ad12b5f5c",
+      "name": "Fetch Article",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -160,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ════════════════════════════════════════════════════════\n// Extract article text, sanitize branding, rewrite URLs\n// ════════════════════════════════════════════════════════\n\nconst html = $input.first().json.data || $input.first().json.body || '';\nconst originalUrl = $('Deduplicate Articles').first().json.url;\n\n// Get config from the Config node\nconst config = $('Config').first().json;\n\n// ── Extract title ──\nconst h1Match = html.match(/<h1[^>]*class=\"heading\"[^>]*>([^<]+)<\\/h1>/i)\n  || html.match(/<h1[^>]*>([^<]+)<\\/h1>/i);\nconst titleMatch = html.match(/<title[^>]*>([^<]+)<\\/title>/i);\nlet title = (h1Match?.[1] || titleMatch?.[1] || 'Untitled Article').trim();\n\n// ── Extract article body (Freshdesk structure) ──\nlet articleHtml = html;\n\n// Try to isolate the article content div\nconst articleMatch = html.match(\n  /<div[^>]*class=\"article-body\"[^>]*>([\\s\\S]*?)<\\/div>\\s*(?:<\\/div>|<div[^>]*class=\"article-footer)/i\n) || html.match(\n  /<article[^>]*>([\\s\\S]*?)<\\/article>/i\n);\nif (articleMatch) {\n  articleHtml = articleMatch[1];\n}\n\n// ── Strip HTML tags ──\nlet text = articleHtml\n  .replace(/<script[^>]*>[\\s\\S]*?<\\/script>/gi, '')\n  .replace(/<style[^>]*>[\\s\\S]*?<\\/style>/gi, '')\n  .replace(/<nav[^>]*>[\\s\\S]*?<\\/nav>/gi, '')\n  .replace(/<footer[^>]*>[\\s\\S]*?<\\/footer>/gi, '')\n  .replace(/<header[^>]*>[\\s\\S]*?<\\/header>/gi, '')\n  .replace(/<aside[^>]*>[\\s\\S]*?<\\/aside>/gi, '')\n  .replace(/<br\\s*\\/?>/gi, '\\n')\n  .replace(/<\\/p>/gi, '\\n\\n')\n  .replace(/<\\/li>/gi, '\\n')\n  .replace(/<li[^>]*>/gi, '• ')\n  .replace(/<\\/h[1-6]>/gi, '\\n\\n')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&quot;/g, '\"')\n  .replace(/&#39;/g, \"'\")\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .replace(/ {2,}/g, ' ')\n  .trim();\n\n// ── Apply branding replacements ──\nconst replacements = [\n  { find: /GoHighLevel/gi, replace: 'Nils Platform' },\n  { find: /\\bGHL\\b/g, replace: 'Nils Platform' },\n  { find: /HighLevel/gi, replace: 'Nils Platform' },\n  { find: /Lead\\s*Connector/gi, replace: 'Nils Platform' },\n  { find: /LeadConnector/gi, replace: 'Nils Platform' },\n];\n\nfor (const r of replacements) {\n  text = text.replace(r.find, r.replace);\n  title = title.replace(r.find, r.replace);\n}\n\n// ── Rewrite source URL for citations ──\nconst brandedUrl = originalUrl.replace(\n  'help.leadconnectorhq.com',\n  'help.nilsdigital.com'\n);\n\n// ── Skip if content too short (nav-only pages, errors) ──\nif (text.length < 150) {\n  console.log(`Skipping ${originalUrl} — too short (${text.length} chars)`);\n  return [];\n}\n\n// ── Build the document for File Search Store ──\nconst document = [\n  `Title: ${title}`,\n  `Source: ${brandedUrl}`,\n  `Type: Help Article`,\n  '',\n  text\n].join('\\n');\n\nconsole.log(`Processed: ${title} (${document.length} chars)`);\n\nreturn [{\n  json: {\n    document,\n    title,\n    originalUrl,\n    brandedUrl,\n    charCount: document.length\n  }\n}];"
+      },
+      "id": "d08514fb-cc97-4078-a832-13673a3e3d2b",
+      "name": "Clean & Rebrand Article",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ════════════════════════════════════════════════════════\n// Ingestion Summary\n// ════════════════════════════════════════════════════════\n\nconst items = $input.all();\nlet successful = 0;\nlet failed = 0;\nconst errors = [];\n\nfor (const item of items) {\n  if (item.json.error || item.json.statusCode >= 400) {\n    failed++;\n    errors.push({\n      title: item.json.title || 'Unknown',\n      error: item.json.error || `HTTP ${item.json.statusCode}`\n    });\n  } else {\n    successful++;\n  }\n}\n\nconst summary = {\n  status: failed === 0 ? '✅ All articles uploaded' : '⚠️ Some uploads failed',\n  totalProcessed: items.length,\n  successful,\n  failed,\n  timestamp: new Date().toISOString(),\n};\n\nif (errors.length > 0) {\n  summary.errors = errors.slice(0, 10); // Show first 10 errors\n}\n\nconsole.log(JSON.stringify(summary, null, 2));\nreturn [{ json: summary }];"
+      },
+      "id": "69d502ad-1e17-4783-9b87-72353ef956bf",
+      "name": "Ingestion Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 20,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -384,
+        320
+      ],
+      "id": "0101c98a-2315-4903-8976-e7287e881832",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "resource": "fileSearch",
+        "operation": "uploadToStore",
+        "fileSearchStoreName": "fileSearchStores/nils-platform-support-docs-4womudfm7mg8",
+        "displayName": "={{ $json.title }}",
+        "fileUrl": "={{ $json.url }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        336
+      ],
+      "id": "22008a87-e557-4020-8f98-389edbca584c",
+      "name": "Upload a file to a File Search store",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "A2Qg4q87pqlKX1Fb",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Weekly Trigger → Sync Help Center Articles",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2176,
+        112
+      ],
+      "id": "270996ae-f684-4bb7-a259-4e87ecfe778b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Workflow Configuration (Source + Branding + Store ID)",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1968,
+        112
+      ],
+      "id": "55765728-8208-43b7-b7b0-1babae847635",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Fetch Help Center Index Page",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1744,
+        112
+      ],
+      "id": "8c10a4f2-966c-4b04-976b-57fe8f74d8e9",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Extract Folder & Article Links",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1552,
+        112
+      ],
+      "id": "349bf79a-b394-49cd-8848-352c6f73b561",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Check Link Type (Folder vs Article)",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1312,
+        112
+      ],
+      "id": "69bea69d-affb-4c4f-9d12-9739fe7033e2",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Downloads folder/category pages that contain article links.",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        -48
+      ],
+      "id": "60ce484e-26a2-43de-89a1-4c70a4e534d1",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "Parses folder HTML and extracts article URLs.",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -48
+      ],
+      "id": "0cbb8695-e51e-4d8e-bb9c-af60da1fc24a",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "Merge & Deduplicate Article URLs",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        160
+      ],
+      "id": "4e26ed36-890f-4615-bfd7-d445232ca337",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "Batch Processing (20 Articles per Cycle)",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        160
+      ],
+      "id": "3f065bc1-8df0-46f9-be7d-181226439135",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "Fetches the full article page.",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        160
+      ],
+      "id": "3d7f1f38-152e-49eb-8fd1-58d8c9979f9b",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "Extract Content + Sanitize Branding",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        160
+      ],
+      "id": "5223a36e-c51a-40ea-864e-efa2deed2b5f",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "Upload Article → Gemini File Search Store",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        160
+      ],
+      "id": "93b31d68-496b-4528-b219-407ef9faa509",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "Generate Ingestion Report",
+        "height": 112,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        160
+      ],
+      "id": "73e82740-7fb2-41cf-aaa1-6a62d67baa30",
+      "name": "Sticky Note12"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Weekly Schedule": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Fetch Solutions Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Solutions Page": {
+      "main": [
+        [
+          {
+            "node": "Extract All Links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract All Links": {
+      "main": [
+        [
+          {
+            "node": "Folder or Article?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Folder or Article?": {
+      "main": [
+        [
+          {
+            "node": "Fetch Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Deduplicate Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Folder": {
+      "main": [
+        [
+          {
+            "node": "Extract Folder Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Folder Articles": {
+      "main": [
+        [
+          {
+            "node": "Deduplicate Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplicate Articles": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Article": {
+      "main": [
+        [
+          {
+            "node": "Clean & Rebrand Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean & Rebrand Article": {
+      "main": [
+        [
+          {
+            "node": "Upload a file to a File Search store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ingestion Summary": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Fetch Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a file to a File Search store": {
+      "main": [
+        [
+          {
+            "node": "Ingestion Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a1a1dc7d-7244-4652-a16b-cc1071681214",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "82420622e8beeac28a8beb79036622396503942feaa2d7b20180d51c0acd30d5"
+  },
+  "id": "GHI3eYvRCxHpl7fJ",
+  "tags": []
+}

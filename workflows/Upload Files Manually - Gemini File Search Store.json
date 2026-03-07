@@ -1,0 +1,87 @@
+{
+  "name": "Upload Files Manually - Gemini File Search Store",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "fileSearch",
+        "operation": "uploadToStore",
+        "fileSearchStoreName": "fileSearchStores/nils-platform-support-docs-4womudfm7mg8",
+        "displayName": "FAQs",
+        "inputType": "binary",
+        "binaryPropertyName": "data0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        80
+      ],
+      "id": "2a0793bf-2d36-4b89-863a-19f3b974925b",
+      "name": "Upload a file to a File Search store",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "A2Qg4q87pqlKX1Fb",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        80
+      ],
+      "id": "eeeaf27c-3d44-4550-ae0c-533c0ecfbf34",
+      "name": "When chat message received",
+      "webhookId": "a8cd6db8-53f9-41ad-9227-3b05f5d2171d"
+    },
+    {
+      "parameters": {
+        "content": "Upload Files Manually",
+        "height": 272,
+        "width": 608,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        16
+      ],
+      "id": "9c7c2a67-86e7-49a4-9251-a9b31543e4a3",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Upload a file to a File Search store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8a8fe63a-c5ac-4942-95a2-a6db29a7750d",
+  "meta": {
+    "instanceId": "82420622e8beeac28a8beb79036622396503942feaa2d7b20180d51c0acd30d5"
+  },
+  "id": "fCqgzil8wMRa1K7b",
+  "tags": []
+}
