@@ -3,7 +3,7 @@
 
   // ─── CONFIG ────────────────────────────────────────────────────────
   const CONFIG = {
-    webhookUrl: "https://nilsdigital.app.n8n.cloud/webhook-test/ghl-chat", // Replace with your n8n webhook URL
+    webhookUrl: "https://nilsdigital.app.n8n.cloud/webhook/ghl-chat", // Replace with your n8n webhook URL
     brandName: "Nils Platform",
     brandColor: "#046BD2",
     brandColorHover: "#0357A8",
