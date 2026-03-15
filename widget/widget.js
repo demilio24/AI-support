@@ -3,250 +3,208 @@
 
   // ─── CONFIG ────────────────────────────────────────────────────────
   const CONFIG = {
-    webhookUrl: "https://nilsdigital.app.n8n.cloud/webhook/f61815ce-f800-4913-a5d3-69303910022f/chat", // Replace with your n8n webhook URL
-    brandName: "Nils Platform",
-    brandColor: "#046BD2",
-    brandColorHover: "#0357A8",
-    brandColorLight: "#E8F2FC",
+    webhookUrl: "https://nilsdigital.app.n8n.cloud/webhook/f61815ce-f800-4913-a5d3-69303910022f/chat",
+    brandName: "Support Assistant",
+    brandColor: "#046bd2",
+    brandColorHover: "#0358b0",
     placeholderText: "Ask a question...",
     welcomeMessage:
-      "Hi! I'm your platform support assistant. Ask me anything about the platform, compliance, or how to get things done.",
+      "Hey! 👋 Got a question? Ask away and I'll guide you.",
     fallbackMessage:
       "I couldn't find a clear answer to that. Please email us at **info@nilsdigital.com** and we'll get back to you shortly.",
-    position: "right", // 'left' or 'right'
-    zIndex: 999999,
+    tabLabel: "Support",
+    position: "right",
+    zIndex: 99999,
   };
 
   // ─── STYLES ────────────────────────────────────────────────────────
   const STYLES = `
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
 
-    #nils-chat-widget * {
+    #nils-chat-widget *,
+    #nils-chat-widget *::before,
+    #nils-chat-widget *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    /* ── Launcher Button ── */
-    #nils-chat-launcher {
+    /* ── Collapsed Side Tab ── */
+    #nils-widget-tab {
       position: fixed;
-      bottom: 24px;
-      ${CONFIG.position}: 24px;
-      z-index: ${CONFIG.zIndex};
-      width: 56px;
-      height: 56px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, ${CONFIG.brandColor} 0%, #0357A8 100%);
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(4, 107, 210, 0.4), 0 1px 3px rgba(0,0,0,0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                  box-shadow 0.25s ease,
-                  background 0.2s ease;
-    }
-
-    #nils-chat-launcher:hover {
-      transform: scale(1.06);
-      box-shadow: 0 6px 22px rgba(4, 107, 210, 0.5), 0 2px 6px rgba(0,0,0,0.1);
-    }
-
-    /* ── Dismiss button (hide launcher) ── */
-    #nils-chat-dismiss {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #6b7280;
-      border: 2px solid #ffffff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transform: scale(0.6);
-      transition: opacity 0.2s ease, transform 0.2s ease, background 0.15s ease;
-      z-index: ${CONFIG.zIndex + 1};
-    }
-
-    #nils-chat-launcher:hover #nils-chat-dismiss,
-    #nils-chat-dismiss:hover {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    #nils-chat-dismiss:hover {
-      background: #ef4444;
-    }
-
-    #nils-chat-dismiss svg {
-      width: 9px;
-      height: 9px;
-      fill: #ffffff;
-    }
-
-    /* ── Retracted tab (bring launcher back) ── */
-    #nils-chat-retracted-tab {
-      position: fixed;
-      bottom: 24px;
       ${CONFIG.position}: 0;
+      bottom: 140px;
       z-index: ${CONFIG.zIndex};
-      background: linear-gradient(135deg, ${CONFIG.brandColor} 0%, #0357A8 100%);
-      color: #ffffff;
-      border: none;
+      background: ${CONFIG.brandColor};
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      padding: 20px 11px;
+      border-radius: 8px 0 0 8px;
       cursor: pointer;
-      padding: 10px 14px 10px 12px;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.2px;
-      display: none;
+      display: flex;
       align-items: center;
       gap: 6px;
-      ${CONFIG.position === "right" ? "border-radius: 10px 0 0 10px;" : "border-radius: 0 10px 10px 0;"}
-      box-shadow: 0 4px 12px rgba(4, 107, 210, 0.3);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      writing-mode: horizontal-tb;
+      border: none;
+      box-shadow: -2px 0 14px rgba(4,107,210,0.22);
+      transition: background 0.15s ease, padding 0.15s ease;
+      user-select: none;
     }
 
-    #nils-chat-retracted-tab:hover {
-      ${CONFIG.position === "right" ? "transform: translateX(-4px);" : "transform: translateX(4px);"}
-      box-shadow: 0 6px 20px rgba(4, 107, 210, 0.4);
+    #nils-widget-tab:hover {
+      background: ${CONFIG.brandColorHover};
+      padding-bottom: 26px;
     }
 
-    #nils-chat-retracted-tab svg {
-      width: 14px;
-      height: 14px;
-      fill: #ffffff;
+    #nils-widget-tab.nils-hidden {
+      display: none;
+    }
+
+    .nils-tab-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #5ddb8c;
       flex-shrink: 0;
     }
 
-    #nils-chat-launcher svg {
-      width: 24px;
-      height: 24px;
-      fill: #ffffff;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    #nils-chat-launcher .nils-icon-close {
-      position: absolute;
-      opacity: 0;
-      transform: rotate(-90deg) scale(0.6);
-    }
-
-    #nils-chat-launcher.nils-open .nils-icon-chat {
-      opacity: 0;
-      transform: rotate(90deg) scale(0.6);
-    }
-
-    #nils-chat-launcher.nils-open .nils-icon-close {
-      opacity: 1;
-      transform: rotate(0deg) scale(1);
-    }
-
-    /* ── Chat Window ── */
-    #nils-chat-window {
+    /* ── Chat Panel ── */
+    #nils-chat-panel {
       position: fixed;
-      bottom: 96px;
-      ${CONFIG.position}: 24px;
+      bottom: 0;
+      ${CONFIG.position}: 0;
       z-index: ${CONFIG.zIndex - 1};
-      width: 370px;
-      max-width: calc(100vw - 32px);
-      height: 450px;
-      max-height: calc(100vh - 120px);
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+      width: 355px;
+      max-width: calc(100vw - 16px);
+      height: 500px;
+      max-height: calc(100vh - 40px);
+      background: #fff;
+      border-radius: 14px 0 0 0;
+      box-shadow: -3px 0 28px rgba(0,0,0,0.12), 0 -2px 14px rgba(0,0,0,0.07);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      transform: translateX(${CONFIG.position === "right" ? "100%" : "-100%"});
       opacity: 0;
-      transform: translateY(12px) scale(0.97);
       pointer-events: none;
-      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.28s cubic-bezier(.4,0,.2,1),
+                  opacity 0.22s ease,
+                  bottom 0.28s ease,
+                  ${CONFIG.position} 0.28s ease,
+                  border-radius 0.28s ease;
     }
 
-    #nils-chat-window.nils-visible {
+    #nils-chat-panel.nils-open {
+      transform: translateX(0);
       opacity: 1;
-      transform: translateY(0) scale(1);
       pointer-events: all;
+      bottom: 24px;
+      ${CONFIG.position}: 20px;
+      border-radius: 14px;
     }
 
     /* ── Header ── */
-    .nils-chat-header {
-      padding: 16px 20px;
-      background: linear-gradient(135deg, ${CONFIG.brandColor} 0%, #0357A8 100%);
-      color: #ffffff;
-      flex-shrink: 0;
+    .nils-panel-header {
+      background: linear-gradient(135deg, ${CONFIG.brandColor} 0%, #035ab5 100%);
+      padding: 14px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
-    .nils-chat-header-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.2);
+    .nils-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.14);
+      border: 1.5px solid rgba(255,255,255,0.22);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
 
-    .nils-chat-header-avatar svg {
-      width: 20px;
-      height: 20px;
-      fill: #ffffff;
+    .nils-avatar svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
-    .nils-chat-header-info {
+    .nils-header-info {
       flex: 1;
       min-width: 0;
     }
 
-    .nils-chat-header-title {
-      font-size: 15px;
+    .nils-h-name {
+      color: #fff;
       font-weight: 600;
-      letter-spacing: -0.2px;
-      line-height: 1.3;
+      font-size: 13.5px;
+      margin-bottom: 3px;
     }
 
-    .nils-chat-header-subtitle {
-      font-size: 11.5px;
-      opacity: 0.75;
-      margin-top: 1px;
-      font-weight: 400;
+    .nils-h-status {
+      color: rgba(255,255,255,0.70);
+      font-size: 11px;
       display: flex;
       align-items: center;
       gap: 5px;
     }
 
-    .nils-online-dot {
+    .nils-status-dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #34d399;
-      display: inline-block;
+      background: #5ddb8c;
+      animation: nils-pulse-dot 2s infinite;
       flex-shrink: 0;
+    }
+
+    @keyframes nils-pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 2px rgba(93,219,140,0.25); }
+      50% { box-shadow: 0 0 0 5px rgba(93,219,140,0.08); }
+    }
+
+    .nils-btn-collapse {
+      background: rgba(255,255,255,0.11);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 7px;
+      color: rgba(255,255,255,0.82);
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 5px 9px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.14s ease;
+    }
+
+    .nils-btn-collapse:hover {
+      background: rgba(255,255,255,0.22);
+      color: #fff;
     }
 
     /* ── Messages Area ── */
     .nils-chat-messages {
       flex: 1;
       overflow-y: auto;
-      padding: 18px 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 6px;
       scroll-behavior: smooth;
-      background: #fafbfc;
+      background: #ffffff;
     }
 
     .nils-chat-messages::-webkit-scrollbar {
@@ -262,76 +220,61 @@
       border-radius: 10px;
     }
 
-    /* ── Message Bubbles ── */
-    .nils-msg {
-      max-width: 70%;
-      padding: 12px 18px;
-      border-radius: 16px;
-      font-size: 14px;
-      line-height: 1.5;
-      color: #1a1a1a;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      word-break: break-word;
-      hyphens: auto;
-      animation: nils-msg-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    /* ── Message Wrapper ── */
+    .nils-msg-wrap {
+      display: flex;
+      flex-direction: column;
+      animation: nils-msg-in 0.18s ease;
+    }
+
+    .nils-msg-wrap.nils-user {
+      align-items: flex-end;
+    }
+
+    .nils-msg-wrap.nils-bot {
+      align-items: flex-start;
     }
 
     @keyframes nils-msg-in {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: none; }
     }
 
-    .nils-msg-bot {
-      align-self: flex-start;
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-bottom-left-radius: 5px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    /* ── Message Bubbles ── */
+    .nils-bubble {
+      max-width: 72%;
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
     }
 
-    .nils-msg-user {
-      align-self: flex-end;
+    .nils-msg-wrap.nils-user .nils-bubble {
       background: ${CONFIG.brandColor};
-      color: #ffffff;
-      border-bottom-right-radius: 5px;
-      box-shadow: 0 1px 3px rgba(4, 107, 210, 0.25);
+      color: #fff;
+      border-bottom-right-radius: 3px;
     }
 
-    .nils-msg-bot p {
-      margin-bottom: 9px;
-      word-wrap: break-word;
+    .nils-msg-wrap.nils-bot .nils-bubble {
+      background: #f2f3f5;
+      color: #1a202c;
+      border-bottom-left-radius: 3px;
     }
-    .nils-msg-bot p:last-child { margin-bottom: 0; }
-    .nils-msg-bot p:first-child { margin-top: 0; }
 
-    .nils-msg-bot strong { font-weight: 600; }
+    /* ── Bot message rich content ── */
+    .nils-msg-wrap.nils-bot .nils-bubble strong {
+      font-weight: 600;
+    }
 
-    .nils-msg-bot a {
+    .nils-msg-wrap.nils-bot .nils-bubble a {
       color: ${CONFIG.brandColor};
       text-decoration: none;
       font-weight: 500;
     }
 
-    .nils-msg-bot a:hover {
+    .nils-msg-wrap.nils-bot .nils-bubble a:hover {
       text-decoration: underline;
-    }
-
-    .nils-msg-bot ul, .nils-msg-bot ol {
-      margin: 4px 0;
-      padding-left: 18px;
-    }
-
-    .nils-msg-bot li {
-      margin-bottom: 3px;
-    }
-
-    .nils-msg-bot code {
-      background: #f1f3f5;
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-size: 12.5px;
-      font-family: 'SF Mono', Menlo, monospace;
     }
 
     /* ── Source Link ── */
@@ -341,7 +284,7 @@
       gap: 5px;
       margin-top: 6px;
       padding: 5px 10px;
-      background: ${CONFIG.brandColorLight};
+      background: #e8f2fc;
       border-radius: 8px;
       font-size: 12px;
       color: ${CONFIG.brandColor};
@@ -363,59 +306,58 @@
     }
 
     /* ── Typing Indicator ── */
-    .nils-typing {
-      align-self: flex-start;
+    .nils-typing-bubble {
+      background: #f2f3f5;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border-bottom-left-radius: 3px;
       display: flex;
+      align-items: center;
       gap: 4px;
-      padding: 12px 18px;
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      border-bottom-left-radius: 5px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
 
-    .nils-typing-dot {
-      width: 6px;
-      height: 6px;
+    .nils-typing-bubble span {
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
-      background: #9ca3af;
-      animation: nils-bounce 1.2s ease-in-out infinite;
+      background: #9aabb8;
+      animation: nils-typing-bounce 1.1s infinite;
     }
 
-    .nils-typing-dot:nth-child(2) { animation-delay: 0.15s; }
-    .nils-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+    .nils-typing-bubble span:nth-child(2) { animation-delay: 0.15s; }
+    .nils-typing-bubble span:nth-child(3) { animation-delay: 0.30s; }
 
-    @keyframes nils-bounce {
+    @keyframes nils-typing-bounce {
       0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-4px); }
+      30% { transform: translateY(-5px); background: ${CONFIG.brandColor}; }
     }
 
     /* ── Input Area ── */
-    .nils-chat-input-area {
-      padding: 12px 14px;
-      border-top: 1px solid #eef0f2;
+    .nils-input-row {
+      border-top: 1px solid #edf0f4;
+      padding: 10px 11px;
       display: flex;
-      gap: 8px;
       align-items: flex-end;
+      gap: 6px;
+      background: #fff;
       flex-shrink: 0;
-      background: #ffffff;
     }
 
     .nils-chat-input {
       flex: 1;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 13.5px;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 9px;
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 13px;
+      color: #1a202c;
+      background: #f8fafc;
       resize: none;
       outline: none;
-      max-height: 80px;
-      line-height: 1.4;
+      min-height: 36px;
+      max-height: 88px;
+      line-height: 1.45;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      color: #1a1a1a;
-      background: #f9fafb;
     }
 
     .nils-chat-input::placeholder {
@@ -429,70 +371,75 @@
     }
 
     .nils-chat-send {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: 10px;
-      background: linear-gradient(135deg, ${CONFIG.brandColor} 0%, #0357A8 100%);
+      background: ${CONFIG.brandColor};
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: all 0.14s ease;
     }
 
     .nils-chat-send:hover {
+      background: ${CONFIG.brandColorHover};
       transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(4, 107, 210, 0.35);
     }
 
     .nils-chat-send:disabled {
-      background: #d1d5db;
+      background: #b4cce8;
+      box-shadow: none;
       cursor: not-allowed;
       transform: none;
-      box-shadow: none;
     }
 
     .nils-chat-send svg {
-      width: 16px;
-      height: 16px;
-      fill: #ffffff;
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     /* ── Footer ── */
-    .nils-chat-footer {
+    .nils-panel-footer {
       text-align: center;
-      padding: 6px 14px;
       font-size: 10.5px;
-      color: #b0b8c4;
-      background: #f9fafb;
-      border-top: 1px solid #eef0f2;
-      letter-spacing: 0.1px;
+      color: #bac4cf;
+      padding: 8px 0 12px;
     }
 
-    .nils-chat-footer a {
+    .nils-panel-footer a {
       color: #8892a0;
       text-decoration: none;
       font-weight: 500;
     }
 
-    .nils-chat-footer a:hover {
+    .nils-panel-footer a:hover {
       color: ${CONFIG.brandColor};
     }
 
     /* ── Mobile ── */
     @media (max-width: 480px) {
-      #nils-chat-window {
+      #nils-chat-panel {
         width: calc(100vw - 16px);
-        height: calc(100vh - 120px);
-        bottom: 88px;
-        ${CONFIG.position}: 8px;
-        border-radius: 14px;
+        height: calc(100vh - 80px);
       }
-      .nils-chat-header { padding: 14px 16px; }
-      .nils-chat-messages { padding: 16px 16px; }
-      .nils-msg { max-width: 80%; }
+
+      #nils-chat-panel.nils-open {
+        bottom: 8px;
+        ${CONFIG.position}: 8px;
+      }
+
+      .nils-panel-header { padding: 12px; }
+      .nils-chat-messages { padding: 10px; }
+      .nils-bubble { max-width: 90%; }
     }
   `;
 
@@ -507,52 +454,50 @@
     const container = document.createElement("div");
     container.id = "nils-chat-widget";
     container.innerHTML = `
-      <!-- Launcher -->
-      <button id="nils-chat-launcher" aria-label="Open support chat">
-        <span id="nils-chat-dismiss" title="Hide chat" aria-label="Hide chat widget">
-          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </span>
-        <svg class="nils-icon-chat" viewBox="0 0 24 24">
-          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
-          <path d="M7 9h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/>
-        </svg>
-        <svg class="nils-icon-close" viewBox="0 0 24 24">
-          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-        </svg>
+      <!-- Side Tab -->
+      <button id="nils-widget-tab" aria-label="Open support chat">
+        <span class="nils-tab-dot"></span>
+        ${CONFIG.tabLabel}
       </button>
 
-      <!-- Retracted Tab (shown when launcher is hidden) -->
-      <button id="nils-chat-retracted-tab" aria-label="Show support chat">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
-        Help
-      </button>
-
-      <!-- Chat Window -->
-      <div id="nils-chat-window">
-        <div class="nils-chat-header">
-          <div class="nils-chat-header-avatar">
-            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/><path d="M7 9h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
+      <!-- Chat Panel -->
+      <div id="nils-chat-panel">
+        <div class="nils-panel-header">
+          <div class="nils-avatar">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
           </div>
-          <div class="nils-chat-header-info">
-            <div class="nils-chat-header-title">${CONFIG.brandName}</div>
-            <div class="nils-chat-header-subtitle"><span class="nils-online-dot"></span> Online · Replies instantly</div>
+          <div class="nils-header-info">
+            <div class="nils-h-name">${CONFIG.brandName}</div>
+            <div class="nils-h-status"><span class="nils-status-dot"></span>Online · here to help</div>
           </div>
+          <button class="nils-btn-collapse" id="nils-btn-collapse" aria-label="Hide chat">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+            Hide
+          </button>
         </div>
+
         <div class="nils-chat-messages" id="nils-messages"></div>
-        <div class="nils-chat-input-area">
-          <textarea 
-            class="nils-chat-input" 
-            id="nils-input" 
-            placeholder="${CONFIG.placeholderText}" 
+
+        <div class="nils-input-row">
+          <textarea
+            class="nils-chat-input"
+            id="nils-input"
+            placeholder="${CONFIG.placeholderText}"
             rows="1"
           ></textarea>
           <button class="nils-chat-send" id="nils-send" aria-label="Send message">
             <svg viewBox="0 0 24 24">
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2" fill="none"/>
             </svg>
           </button>
         </div>
-        <div class="nils-chat-footer">Powered by <a href="https://nilsdigital.com" target="_blank" rel="noopener">${CONFIG.brandName}</a></div>
+        <div class="nils-panel-footer">Powered by <a href="https://nilsdigital.com" target="_blank" rel="noopener">Nils Platform</a></div>
       </div>
     `;
     document.body.appendChild(container);
@@ -561,99 +506,57 @@
   // ─── MARKDOWN PARSER (lightweight) ─────────────────────────────────
   function parseMarkdown(text) {
     if (!text) return "";
-    let html = text
+    return text
       // escape HTML
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       // bold
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      // italic
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      // inline code
-      .replace(/`(.+?)`/g, "<code>$1</code>")
-      // links
-      .replace(
-        /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
-        '<a href="$2" target="_blank" rel="noopener">$1</a>'
-      );
-
-    // Split into paragraphs
-    const blocks = html.split(/\n\n+/);
-    return blocks
-      .map((block) => {
-        // Unordered list
-        if (/^[\-\*] /m.test(block)) {
-          const items = block
-            .split(/\n/)
-            .filter((l) => l.trim())
-            .map((l) => `<li>${l.replace(/^[\-\*]\s+/, "")}</li>`)
-            .join("");
-          return `<ul>${items}</ul>`;
-        }
-        // Ordered list
-        if (/^\d+\. /m.test(block)) {
-          const items = block
-            .split(/\n/)
-            .filter((l) => l.trim())
-            .map((l) => `<li>${l.replace(/^\d+\.\s+/, "")}</li>`)
-            .join("");
-          return `<ol>${items}</ol>`;
-        }
-        // Regular paragraph
-        return `<p>${block.replace(/\n/g, "<br>")}</p>`;
-      })
-      .join("");
+      // newlines to br
+      .replace(/\n/g, "<br>");
   }
 
   // ─── CHAT LOGIC ────────────────────────────────────────────────────
   let isOpen = false;
   let isLoading = false;
-  let isRetracted = false;
+  let hasOpened = false;
   let conversationHistory = [];
   let sessionId = "sess_" + Math.random().toString(36).substring(2, 12);
 
-  function retractWidget() {
-    // Close chat if open
-    if (isOpen) {
-      toggleChat();
+  function openPanel() {
+    const panel = document.getElementById("nils-chat-panel");
+    const tab = document.getElementById("nils-widget-tab");
+
+    panel.classList.add("nils-open");
+    tab.classList.add("nils-hidden");
+    isOpen = true;
+
+    if (!hasOpened) {
+      hasOpened = true;
+      addBotMessage(CONFIG.welcomeMessage);
     }
-    const launcher = document.getElementById("nils-chat-launcher");
-    const tab = document.getElementById("nils-chat-retracted-tab");
-    launcher.style.display = "none";
-    tab.style.display = "flex";
-    isRetracted = true;
+
+    setTimeout(() => {
+      const input = document.getElementById("nils-input");
+      if (input) input.focus();
+      scrollBottom();
+    }, 300);
   }
 
-  function restoreWidget() {
-    const launcher = document.getElementById("nils-chat-launcher");
-    const tab = document.getElementById("nils-chat-retracted-tab");
-    launcher.style.display = "flex";
-    tab.style.display = "none";
-    isRetracted = false;
-  }
+  function collapsePanel() {
+    const panel = document.getElementById("nils-chat-panel");
+    const tab = document.getElementById("nils-widget-tab");
 
-  function toggleChat() {
-    const launcher = document.getElementById("nils-chat-launcher");
-    const window_ = document.getElementById("nils-chat-window");
-    isOpen = !isOpen;
-    launcher.classList.toggle("nils-open", isOpen);
-    window_.classList.toggle("nils-visible", isOpen);
-
-    if (isOpen) {
-      // Add welcome message on first open
-      const msgs = document.getElementById("nils-messages");
-      if (msgs.children.length === 0) {
-        addBotMessage(CONFIG.welcomeMessage);
-      }
-      setTimeout(() => document.getElementById("nils-input").focus(), 300);
-    }
+    panel.classList.remove("nils-open");
+    tab.classList.remove("nils-hidden");
+    isOpen = false;
   }
 
   function addBotMessage(text, sourceUrl, sourceTitle) {
     const msgs = document.getElementById("nils-messages");
-    const msgEl = document.createElement("div");
-    msgEl.className = "nils-msg nils-msg-bot";
+    const wrap = document.createElement("div");
+    wrap.className = "nils-msg-wrap nils-bot";
 
     let content = parseMarkdown(text);
 
@@ -665,37 +568,42 @@
         </a>`;
     }
 
-    msgEl.innerHTML = content;
-    msgs.appendChild(msgEl);
-    msgs.scrollTop = msgs.scrollHeight;
+    wrap.innerHTML = `<div class="nils-bubble">${content}</div>`;
+    msgs.appendChild(wrap);
+    scrollBottom();
   }
 
   function addUserMessage(text) {
     const msgs = document.getElementById("nils-messages");
-    const msgEl = document.createElement("div");
-    msgEl.className = "nils-msg nils-msg-user";
-    msgEl.textContent = text;
-    msgs.appendChild(msgEl);
-    msgs.scrollTop = msgs.scrollHeight;
+    const wrap = document.createElement("div");
+    wrap.className = "nils-msg-wrap nils-user";
+    wrap.innerHTML = `<div class="nils-bubble">${escapeHtml(text)}</div>`;
+    msgs.appendChild(wrap);
+    scrollBottom();
   }
 
   function showTyping() {
     const msgs = document.getElementById("nils-messages");
-    const typing = document.createElement("div");
-    typing.className = "nils-typing";
-    typing.id = "nils-typing-indicator";
-    typing.innerHTML = `
-      <div class="nils-typing-dot"></div>
-      <div class="nils-typing-dot"></div>
-      <div class="nils-typing-dot"></div>
-    `;
-    msgs.appendChild(typing);
-    msgs.scrollTop = msgs.scrollHeight;
+    const wrap = document.createElement("div");
+    wrap.className = "nils-msg-wrap nils-bot";
+    wrap.id = "nils-typing-indicator";
+    wrap.innerHTML = `<div class="nils-typing-bubble"><span></span><span></span><span></span></div>`;
+    msgs.appendChild(wrap);
+    scrollBottom();
   }
 
   function hideTyping() {
     const el = document.getElementById("nils-typing-indicator");
     if (el) el.remove();
+  }
+
+  function scrollBottom() {
+    const msgs = document.getElementById("nils-messages");
+    if (msgs) msgs.scrollTo({ top: msgs.scrollHeight, behavior: "smooth" });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
   async function sendMessage() {
@@ -723,7 +631,7 @@
         body: JSON.stringify({
           message: text,
           sessionId: sessionId,
-          history: conversationHistory.slice(-10), // Last 10 messages for context
+          history: conversationHistory.slice(-10),
         }),
       });
 
@@ -755,29 +663,23 @@
   // ─── AUTO-RESIZE TEXTAREA ──────────────────────────────────────────
   function autoResize(el) {
     el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 100) + "px";
+    el.style.height = Math.min(el.scrollHeight, 88) + "px";
   }
 
   // ─── INIT ──────────────────────────────────────────────────────────
   function init() {
     buildWidget();
 
-    // Event listeners
-    document
-      .getElementById("nils-chat-launcher")
-      .addEventListener("click", toggleChat);
+    // Side tab → open panel
+    document.getElementById("nils-widget-tab").addEventListener("click", openPanel);
 
+    // Hide button → collapse panel
+    document.getElementById("nils-btn-collapse").addEventListener("click", collapsePanel);
+
+    // Send button
     document.getElementById("nils-send").addEventListener("click", sendMessage);
 
-    // Dismiss button — hide the launcher, show edge tab
-    document.getElementById("nils-chat-dismiss").addEventListener("click", (e) => {
-      e.stopPropagation(); // Don't trigger launcher click
-      retractWidget();
-    });
-
-    // Retracted tab — restore the launcher
-    document.getElementById("nils-chat-retracted-tab").addEventListener("click", restoreWidget);
-
+    // Textarea events
     const input = document.getElementById("nils-input");
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -785,7 +687,6 @@
         sendMessage();
       }
     });
-
     input.addEventListener("input", () => autoResize(input));
   }
 
