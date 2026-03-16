@@ -497,7 +497,7 @@
             </svg>
           </button>
         </div>
-        <div class="nils-panel-footer">Powered by <a href="https://nilsdigital.com" target="_blank" rel="noopener">Nils Platform</a></div>
+        <div class="nils-panel-footer">Need help from our team? Email us at <a href="https://nilsdigital.com" target="_blank" rel="noopener">info@nilsdigital.com</a></div>
       </div>
     `;
     document.body.appendChild(container);
