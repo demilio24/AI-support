@@ -25,7 +25,7 @@
     #nils-chat-widget *::before,
     #nils-chat-widget *::after {
       margin: 0;
-      padding: 0;
+      padding: 10;
       box-sizing: border-box;
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
