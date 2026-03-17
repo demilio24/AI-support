@@ -497,7 +497,7 @@
             </svg>
           </button>
         </div>
-        <div class="nils-panel-footer">Need help from our team? Email us at <a href="https://nilsdigital.com" target="_blank" rel="noopener">info@nilsdigital.com</a></div>
+        <div class="nils-panel-footer">Need help from our team? Email us at <a href="mailto:info@nilsdigital.com" target="_blank" rel="noopener">info@nilsdigital.com</a></div>
       </div>
     `;
     document.body.appendChild(container);
@@ -570,7 +570,7 @@
 
     wrap.innerHTML = `<div class="nils-bubble">${content}</div>`;
     msgs.appendChild(wrap);
-    scrollBottom();
+    wrap.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function addUserMessage(text) {
