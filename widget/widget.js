@@ -3,7 +3,7 @@
 
   // ─── CONFIG ────────────────────────────────────────────────────────
   const CONFIG = {
-    webhookUrl: "https://nilsdigital.app.n8n.cloud/webhook/f61815ce-f800-4913-a5d3-69303910022f/chat",
+    webhookUrl: "https://nilsdigital.app.n8n.cloud/webhook/ghl-chat",
     brandName: "Support Assistant",
     brandColor: "#046bd2",
     brandColorHover: "#0358b0",
